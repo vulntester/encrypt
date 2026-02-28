@@ -5,6 +5,7 @@ import { UI } from './ui.js';
 
 let net = null;
 let currentChat = null;
+let unreadMessages = {}; // Format: { "alice#1234": 2, "bob#5678": 0 }
 
 // --- Initialization & TTL Enforcement ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -57,23 +58,43 @@ function initChatView() {
     net = new Network(myId, handleNetworkMessage);
     
     // Bind UI Tabs
-    document.getElementById('tab-inbox').onclick = () => showTab('inbox');
-    document.getElementById('tab-requests').onclick = () => showTab('requests');
-	document.getElementById('tab-chat').onclick = () => showTab('chat');
+    document.getElementById('tab-inbox').onclick = () => UI.showTab('inbox');
+    document.getElementById('tab-requests').onclick = () => UI.showTab('requests');
+	document.getElementById('tab-chat').onclick = () => {
+    currentChat = null; // Reset selection
+    UI.showTab('chat');
+    // Force show the Handshake view, hide the message view
+    document.getElementById('handshake-init-view').style.display = 'block';
+    document.getElementById('active-chat-view').style.display = 'none';
+};
     
     renderContacts();
+}
+
+function updateNotificationUI(contactId) {
+    // 1. Update the individual contact dot
+    UI.renderContactBadge(contactId, unreadMessages[contactId]);
+    
+    // 2. Calculate and update the Global Inbox Tab badge
+    const total = Object.values(unreadMessages).reduce((a, b) => a + b, 0);
+    UI.updateInboxBadge(total);
 }
 
 async function openChat(contactId) {
     currentChat = contactId;
     
-    // UI Transitions
-    UI.enableChatTab(contactId);
     UI.showTab('chat');
+    // Flip views: hide Handshake, show Messages
+    document.getElementById('handshake-init-view').style.display = 'none';
+    document.getElementById('active-chat-view').style.display = 'block';
     
-    // Load existing history
-    UI.clearMessages();
-    await renderMessages(contactId);
+    UI.els.currentChatTitle.textContent = `Chat: ${contactId}`;
+    
+    // Clear red dots for this contact
+    unreadMessages[contactId] = 0;
+    updateNotificationUI(contactId);
+    
+    renderMessages(contactId);
 }
 
 // Ensure "Enter" key works for sending messages
@@ -89,79 +110,93 @@ function showTab(tab) {
 // --- Network Message Handler ---
 async function handleNetworkMessage(data) {
     if (data.type === 'request') {
-        const reqList = document.getElementById('incoming-requests');
-        const li = document.createElement('li');
-        li.textContent = `${data.from} wants to chat. `;
-        
-        const acceptBtn = document.createElement('button');
-        acceptBtn.textContent = 'Accept';
-        acceptBtn.onclick = () => {
-            net.acceptRequest(data.from, Storage.get('pubKey'));
-            li.remove();
-        };
-        li.appendChild(acceptBtn);
-        reqList.appendChild(li);
+        // This is what was missing/broken:
+        UI.renderRequest(data.from, (senderId) => {
+            net.acceptChat(senderId, Storage.get('pubKey'));
+        });
     } 
     else if (data.type === 'accept') {
-        // Step 2 of Handshake: Save recipient's key, send ours back
+        // Sender receives the acceptance + Recipient's PubKey
         const contacts = Storage.getJson('contacts');
         contacts[data.from] = data.pubKey;
         Storage.setJson('contacts', contacts);
-        net.completeHandshake(data.from, Storage.get('pubKey'));
+        
+        // Finalize: Send Sender's PubKey to Recipient
+        net.finalizeHandshake(data.from, Storage.get('pubKey'));
+        UI.notify(`${data.from} accepted! Check Inbox.`);
         renderContacts();
     }
     else if (data.type === 'pubkey') {
-        // Step 3 of Handshake: Save their key, connection is fully open
+        // Recipient receives Sender's PubKey
         const contacts = Storage.getJson('contacts');
         contacts[data.from] = data.pubKey;
         Storage.setJson('contacts', contacts);
         renderContacts();
     }
     else if (data.type === 'message') {
-        // Decrypt incoming message
-        try {
-            const plaintext = await Crypto.decrypt(data.ciphertext, Storage.get('privKey'));
-            Storage.saveEncryptedMessage(data.from, data.ciphertext, false);
-            if (currentChat === data.from) {
-                renderMessages(data.from);
-            }
-        } catch (err) {
-            console.error("Failed to decrypt message from", data.from);
+        // Standard message decryption...
+        Storage.saveEncryptedMessage(data.from, data.ciphertext, false);
+        if (currentChat !== data.from) {
+            unreadMessages[data.from] = (unreadMessages[data.from] || 0) + 1;
+            updateNotificationUI(data.from);
+        }
+        
+        if (currentChat === data.from) {
+            renderMessages(data.from);
         }
     }
 }
 
 // --- Action Bindings ---
-document.getElementById('send-req-btn').addEventListener('click', () => {
+document.getElementById('send-req-btn').onclick = () => {
     const target = document.getElementById('target-id').value.trim();
-    if (target && target !== Storage.get('identity')) {
-        net.sendRequest(target);
+    if (target && net) {
+        net.requestChat(target);
         document.getElementById('target-id').value = '';
-        alert(`Request sent to ${target}`);
+        UI.notify("Invitation Sent!");
     }
-});
+};
 
-document.getElementById('send-msg-btn').addEventListener('click', async () => {
+document.getElementById('send-msg-btn').onclick = async () => {
     if (!currentChat) return;
     
     const input = document.getElementById('msg-input');
     const plaintext = input.value.trim();
     if (!plaintext) return;
 
-    input.value = ''; // clear immediately
-    
     const contacts = Storage.getJson('contacts');
     const recipientPubKey = contacts[currentChat];
     
     try {
+        // 1. Encrypt for the other person
         const ciphertext = await Crypto.encrypt(plaintext, recipientPubKey);
+        
+        // 2. Send via WebSocket
         net.sendMessage(currentChat, ciphertext);
-        Storage.saveEncryptedMessage(currentChat, ciphertext, true);
+        
+        // 3. Save locally as plaintext so YOU can read it
+        Storage.saveSentMessage(currentChat, plaintext);
+        
+        input.value = '';
         renderMessages(currentChat);
     } catch (err) {
         console.error("Encryption failed", err);
     }
-});
+};
+
+// Bind the Burn button
+document.getElementById('burn-btn').onclick = () => {
+    if (confirm("Burn this session? All keys and messages will be permanently deleted.")) {
+        Storage.wipe();
+    }
+};
+
+document.getElementById('tab-chat').onclick = () => {
+    currentChat = null;
+    UI.showTab('chat');
+    UI.els.handshakeView.style.display = 'block';
+    UI.els.chatView.style.display = 'none';
+};
 
 // --- Rendering Logic (XSS Safe) ---
 function renderContacts() {
@@ -179,25 +214,21 @@ function renderContacts() {
 }
 
 async function renderMessages(contactId) {
-    const container = document.getElementById('messages');
-    container.innerHTML = ''; // Clear container safely
-    
+    UI.clearMessages();
     const msgs = Storage.getJson('messages')[contactId] || [];
     const myPrivKey = Storage.get('privKey');
     
     for (const msg of msgs) {
-        const div = document.createElement('div');
-        div.style.color = msg.isMine ? 'blue' : 'green';
-        
-        try {
-            // Re-decrypt for display (since we only store ciphertext)
-            const plaintext = await Crypto.decrypt(msg.text, myPrivKey);
-            // STRICT DOM INJECTION: textContent only
-            div.textContent = `${msg.isMine ? 'You' : contactId}: ${plaintext}`; 
-        } catch (err) {
-            div.textContent = "[Undecryptable Message]";
-            div.style.color = 'red';
+        let displayBody;
+        if (msg.isMine) {
+            displayBody = msg.text; // Already plaintext
+        } else {
+            try {
+                displayBody = await Crypto.decrypt(msg.text, myPrivKey);
+            } catch (e) {
+                displayBody = "[Decryption Error]";
+            }
         }
-        container.appendChild(div);
+        UI.addMessage(msg.isMine ? 'You' : contactId.split('#')[0], displayBody, msg.isMine);
     }
 }

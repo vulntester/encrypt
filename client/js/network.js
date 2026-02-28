@@ -1,7 +1,5 @@
-/**
- * Network Module: Handles WebSocket lifecycle and packet routing.
- * No UI or Crypto logic allowed here.
- */
+import { Storage } from './storage.js';
+
 export class Network {
     constructor(myId, onMessageCallback) {
         this.myId = myId;
@@ -10,43 +8,32 @@ export class Network {
     }
 
     connect() {
-        // In production, use wss:// for TLS
         this.ws = new WebSocket('ws://localhost:8080');
-
-        this.ws.onopen = () => {
-            console.log("Relay connected.");
-            this.send({ type: 'register', from: this.myId });
-        };
-
-        this.ws.onmessage = (e) => {
-            try {
-                const data = JSON.parse(e.data);
-                this.onMessage(data);
-            } catch (err) {
-                console.error("Malformed network packet received.");
-            }
-        };
-
-        this.ws.onclose = () => {
-            console.warn("Lost connection to relay. Retrying in 5s...");
-            setTimeout(() => this.connect(), 5000);
-        };
+        this.ws.onopen = () => this.send({ type: 'register', from: this.myId });
+        this.ws.onmessage = (e) => this.onMessage(JSON.parse(e.data));
+        this.ws.onclose = () => setTimeout(() => this.connect(), 5000);
     }
 
     send(payload) {
-        if (this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify(payload));
-        } else {
-            console.error("Network: Cannot send, socket closed.");
-        }
+        if (this.ws.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify(payload));
     }
 
-    // Handshake helpers
-    requestChat(to) { this.send({ type: 'request', from: this.myId, to }); }
-    
-    acceptChat(to, pubKey) { this.send({ type: 'accept', from: this.myId, to, pubKey }); }
-    
-    finalizeHandshake(to, pubKey) { this.send({ type: 'pubkey', from: this.myId, to, pubKey }); }
-    
-    emitMessage(to, ciphertext) { this.send({ type: 'message', from: this.myId, to, ciphertext }); }
+    // Step 1: Send the invite
+    requestChat(to) { 
+        this.send({ type: 'request', from: this.myId, to }); 
+    }
+
+    // Step 2: Recipient accepts and sends their PubKey
+    acceptChat(to, pubKey) { 
+        this.send({ type: 'accept', from: this.myId, to, pubKey }); 
+    }
+
+    // Step 3: Original sender sends their PubKey back
+    finalizeHandshake(to, pubKey) { 
+        this.send({ type: 'pubkey', from: this.myId, to, pubKey }); 
+    }
+
+    sendMessage(to, ciphertext) { 
+        this.send({ type: 'message', from: this.myId, to, ciphertext }); 
+    }
 }
