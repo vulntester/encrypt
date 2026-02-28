@@ -126,12 +126,7 @@ export const UI = {
 
     updateInboxBadge(totalUnread) {
         const badge = document.getElementById('inbox-badge');
-        if (totalUnread > 0) {
-            badge.textContent = totalUnread;
-            badge.style.display = 'inline-block';
-        } else {
-            badge.style.display = 'none';
-        }
+        badge.style.display = totalUnread > 0 ? 'inline-block' : 'none';
     },
 
     renderContactBadge(contactId, count) {

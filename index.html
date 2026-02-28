@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Ephemeral PGP Chat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="client/css/style.css">
     <script type="module">
 import openpgp from 'https://cdn.jsdelivr.net/npm/openpgp@6.3.0/+esm'
@@ -27,13 +31,13 @@ import openpgp from 'https://cdn.jsdelivr.net/npm/openpgp@6.3.0/+esm'
     
     <div class="tabs">
 		<button id="tab-inbox" class="active">
-			Inbox <span id="inbox-badge" class="badge-main" style="display:none">0</span>
+			Inbox <span id="inbox-badge" class="badge-main" style="display:none"></span>
 		</button>
 		<button id="tab-requests">
 			Requests <span id="req-badge" class="badge" style="display:none">0</span>
 		</button>
-		<button id="tab-chat" title="Start New Handshake" style="font-size: 1.5rem; font-weight: bold;">+</button>
 	</div>
+
     <div id="inbox-panel" class="tab-panel">
         <h4>Contacts</h4>
         <ul id="active-chats"></ul>
@@ -60,7 +64,8 @@ import openpgp from 'https://cdn.jsdelivr.net/npm/openpgp@6.3.0/+esm'
         </div>
     </div>
 </div>
-</div>
+
+<button id="tab-chat" class="fab-chat" title="Start New Handshake" aria-label="Start New Handshake">💬<span class="fab-plus">+</span></button>
 </div>
 
     <script type="module" src="client/js/app.js"></script>
