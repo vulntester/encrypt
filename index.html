@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Ephemeral PGP Chat</title>
     <link rel="stylesheet" href="client/css/style.css">
     <script type="module">
@@ -27,7 +28,7 @@ import openpgp from 'https://cdn.jsdelivr.net/npm/openpgp@6.3.0/+esm'
     
     <div class="tabs">
 		<button id="tab-inbox" class="active">
-			Inbox <span id="inbox-badge" class="badge-main" style="display:none">0</span>
+			Inbox <span id="inbox-badge" class="badge-main" style="display:none"></span>
 		</button>
 		<button id="tab-requests">
 			Requests <span id="req-badge" class="badge" style="display:none">0</span>
