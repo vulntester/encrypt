@@ -55,6 +55,8 @@ function initChatView() {
 
     const myId = Storage.get('identity');
     document.getElementById('my-identity').textContent = myId;
+    const mobileId = document.getElementById('my-identity-mobile');
+    if (mobileId) mobileId.textContent = myId;
 
     net = new Network(myId, handleNetworkMessage);
 
@@ -64,6 +66,18 @@ function initChatView() {
     document.getElementById('tab-chat').onclick = () => {
         currentChat = null;
         UI.showChatPanel('handshake');
+    };
+
+    // Mobile-only ID tab
+    const tabIdentity = document.getElementById('tab-identity');
+    if (tabIdentity) tabIdentity.onclick = () => UI.showTab('identity');
+
+    // Mobile burn button (inside identity panel)
+    const burnMobile = document.getElementById('burn-btn-mobile');
+    if (burnMobile) burnMobile.onclick = () => {
+        if (confirm('Burn this session? All keys and messages will be permanently deleted.')) {
+            Storage.wipe();
+        }
     };
 
     // Show inbox by default
@@ -83,7 +97,10 @@ function startExpiryCountdown() {
         const totalSeconds = Math.floor(remainingMs / 1000);
         const minutes = Math.floor(totalSeconds / 60);
         const seconds = totalSeconds % 60;
-        timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        const formatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        timerEl.textContent = formatted;
+        const mobileTimer = document.getElementById('timer-val-mobile');
+        if (mobileTimer) mobileTimer.textContent = formatted;
     };
     tick();
     expiryCountdownInterval = setInterval(tick, 1000);

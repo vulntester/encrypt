@@ -17,9 +17,9 @@ export const UI = {
         setTimeout(() => toast.remove(), 3000);
     },
 
-    // Show one of the three main panels: 'inbox' | 'requests' | 'chat'
+    // Show one of the main panels: 'inbox' | 'requests' | 'chat' | 'identity'
     showTab(tabId) {
-        const panels = ['inbox', 'requests', 'chat'];
+        const panels = ['inbox', 'requests', 'chat', 'identity'];
         panels.forEach(id => {
             const el = document.getElementById(`${id}-panel`);
             if (el) el.style.display = id === tabId ? 'flex' : 'none';

@@ -637,73 +637,112 @@ input:focus {
 * { scrollbar-width: thin; scrollbar-color: var(--border-2) transparent; }
 
 /* ─── MOBILE ─────────────────────────────────────────────────────────── */
+/* Hidden on desktop, shown on mobile via media query */
+.mobile-only { display: none; }
+
 @media (max-width: 640px) {
-    html, body { height: 100%; height: 100dvh; overflow: hidden; }
+    html, body {
+        height: 100%;
+        overflow: hidden;
+    }
 
     #setup-view {
-        height: 100dvh;
+        height: 100svh;
         align-items: flex-start;
         padding: 3rem 1.25rem 2rem;
         overflow-y: auto;
     }
 
-    /* Chat: column layout — content on top, nav on bottom */
+    /* Chat: column — content top, nav bottom */
     #chat-view {
         flex-direction: column;
-        height: 100vh;
-        height: 100dvh;
+        height: 100svh;
     }
 
-    /* Main panel fills available space above nav */
+    /* Main panel fills everything above the nav bar */
     #main-panel {
         order: 1;
         flex: 1;
         min-height: 0;
-        height: auto;
+        height: 0; /* let flex control it */
+        position: relative;
     }
 
-    /* Sidebar becomes bottom nav */
+    /* ── BOTTOM NAV BAR ── */
     #sidebar {
         order: 2;
         width: 100%;
         min-width: unset;
-        height: var(--mobile-nav);
-        min-height: var(--mobile-nav);
+        /* fixed height for the tap targets + safe area below */
+        height: calc(var(--mobile-nav) + env(safe-area-inset-bottom, 0px));
+        min-height: calc(var(--mobile-nav) + env(safe-area-inset-bottom, 0px));
         flex-shrink: 0;
-        flex-direction: row;
+        flex-direction: column; /* column so we can add safe-area padding below */
         border-right: none;
         border-top: 1px solid var(--border);
         background: var(--surface);
-        padding-bottom: env(safe-area-inset-bottom, 0px);
+        justify-content: flex-start;
     }
 
+    /* The actual row of tappable items sits inside a fixed-height strip */
+    .sidebar-nav-row {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        height: var(--mobile-nav);
+        flex-shrink: 0;
+    }
+
+    /* Safe-area spacer beneath the tap targets */
+    .sidebar-safe-area {
+        height: env(safe-area-inset-bottom, 0px);
+        flex-shrink: 0;
+    }
+
+    /* Hide desktop-only elements */
     .sidebar-header,
     .identity-card { display: none; }
 
+    /* Show mobile-only elements */
+    .mobile-only { display: flex; }
+
+    /* Nav wraps to horizontal row */
     .sidebar-nav {
         flex: 1;
         flex-direction: row;
         padding: 0;
         gap: 0;
         overflow: hidden;
+        height: 100%;
+        align-items: stretch;
     }
 
+    /* Each nav button: icon + label stacked, centered in full bar height */
     .nav-item {
         flex: 1;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        gap: 3px;
-        padding: 8px 4px;
+        gap: 4px;
+        padding: 0;
         border-radius: 0;
         border: none;
-        font-size: 10px;
+        border-top: 2px solid transparent;
+        font-size: 11px;
+        height: 100%;
+        min-height: var(--mobile-nav);
     }
     .nav-item:hover { background: transparent; border-color: transparent; color: var(--text-2); }
-    .nav-item.active { background: transparent; border-color: transparent; color: var(--accent); }
+    .nav-item.active {
+        background: transparent;
+        border-color: transparent;
+        border-top-color: var(--accent);
+        color: var(--accent);
+    }
     .nav-item.active svg { color: var(--accent); }
-    .nav-label { font-size: 10px; }
+    .nav-label { font-size: 11px; line-height: 1; }
 
+    /* Burn button as a nav-like item on the right */
     .sidebar-footer {
         display: flex;
         align-items: stretch;
@@ -711,23 +750,85 @@ input:focus {
         border-top: none;
         border-left: 1px solid var(--border);
         flex-shrink: 0;
+        height: 100%;
+        min-height: var(--mobile-nav);
     }
     .burn-btn {
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        gap: 3px;
-        padding: 8px 12px;
-        font-size: 10px;
+        gap: 4px;
+        padding: 0 14px;
+        font-size: 11px;
         width: auto;
         border-radius: 0;
+        height: 100%;
+        border-top: 2px solid transparent;
     }
 
-    /* Messages fill correctly on mobile */
-    .messages-container { flex: 1; min-height: 0; }
+    /* Identity panel on mobile */
+    #identity-panel {
+        padding: 24px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        overflow-y: auto;
+    }
+    .mobile-identity-card {
+        background: var(--surface-2);
+        border: 1px solid var(--border-2);
+        border-radius: 14px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .mobile-identity-row {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .mobile-identity-row label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-3);
+    }
+    .mobile-identity-row .val {
+        font-family: var(--mono);
+        font-size: 15px;
+        color: var(--text);
+        font-weight: 500;
+        word-break: break-all;
+    }
+    .mobile-identity-row .val.timer-val {
+        color: var(--accent);
+    }
+    .mobile-burn-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 12px 16px;
+        background: var(--danger-dim);
+        border: 1px solid rgba(244,63,94,0.25);
+        border-radius: var(--radius);
+        color: var(--danger);
+        font-family: var(--sans);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.12s;
+    }
+    .mobile-burn-btn:hover { background: rgba(244,63,94,0.2); }
 
+    /* Messages */
+    .messages-container { flex: 1; min-height: 0; }
     .msg { max-width: 88%; }
 
+    /* Handshake form */
     .handshake-input-row { flex-direction: column; }
     .primary-btn.compact { width: 100%; }
 
