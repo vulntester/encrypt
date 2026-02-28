@@ -3,9 +3,9 @@
  * Zero logic regarding encryption or networking.
  */
 export const UI = {
-	
-	unreadCounts: {}, // { 'bob#1234': 5 }
-    // Selectors
+
+    unreadCounts: {},
+
     els: {
         panels: document.querySelectorAll('.tab-panel'),
         msgContainer: document.getElementById('messages'),
@@ -14,24 +14,6 @@ export const UI = {
         currentChatTitle: document.getElementById('chatting-with'),
         handshakeView: document.getElementById('handshake-init-view'),
         chatView: document.getElementById('active-chat-view')
-    },
-	
-	// Displays the red dot on contacts
-    renderUnreadBadge(contactId, count) {
-        const item = document.querySelector(`.contact-item[data-id="${contactId}"]`);
-        if (!item) return;
-
-        let badge = item.querySelector('.unread-dot');
-        if (count > 0) {
-            if (!badge) {
-                badge = document.createElement('span');
-                badge.className = 'unread-dot';
-                item.appendChild(badge);
-            }
-            badge.textContent = count;
-        } else if (badge) {
-            badge.remove();
-        }
     },
 
     notify(text) {
@@ -42,31 +24,34 @@ export const UI = {
         setTimeout(() => toast.remove(), 3000);
     },
 
-    enableChatTab(contactId) {
-        this.els.tabChatBtn.disabled = false;
-        this.els.tabChatBtn.textContent = `Chat (${contactId.split('#')[0]})`;
-        this.els.currentChatTitle.textContent = `Secure Session: ${contactId}`;
-    },
-
-    showView(viewName) {
-        this.els.setup.style.display = viewName === 'setup' ? 'block' : 'none';
-        this.els.chat.style.display = viewName === 'chat' ? 'block' : 'none';
-    },
-
-    renderContacts(contacts, onSelect) {
-        this.els.contactList.innerHTML = ''; 
-        Object.keys(contacts).forEach(id => {
-            const li = document.createElement('li');
-            li.textContent = id; // XSS Safe
-            li.className = 'contact-item';
-            li.onclick = () => onSelect(id);
-            this.els.contactList.appendChild(li);
+    showTab(tabId) {
+        // Hide all panels
+        ['inbox-panel', 'requests-panel', 'chat-panel'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
         });
+
+        // Show selected panel
+        const panel = document.getElementById(`${tabId}-panel`);
+        if (panel) panel.style.display = 'flex';
+
+        // Update nav active state
+        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+        const activeBtn = document.getElementById(`tab-${tabId}`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+            // Clear notification dot when switching to that tab
+            activeBtn.classList.remove('has-notification');
+        }
     },
 
     renderRequest(from, onAccept) {
         const list = document.getElementById('incoming-requests');
         if (!list) return console.error("❌ Element #incoming-requests not found!");
+
+        // Remove empty state if present
+        const emptyState = list.querySelector('.empty-state');
+        if (emptyState) emptyState.remove();
 
         // Avoid duplicate requests
         if (document.getElementById(`req-${from}`)) return;
@@ -74,68 +59,60 @@ export const UI = {
         const li = document.createElement('li');
         li.id = `req-${from}`;
         li.className = 'request-item';
-        li.innerHTML = `
-            <span>Invite from <strong>${from}</strong></span>
-            <button class="accept-btn">Accept</button>
-        `;
 
-        li.querySelector('.accept-btn').onclick = () => {
+        const label = document.createElement('span');
+        label.innerHTML = `Invite from <strong>${from}</strong>`;
+
+        const btn = document.createElement('button');
+        btn.className = 'accept-btn';
+        btn.textContent = 'Accept';
+        btn.onclick = () => {
             onAccept(from);
             li.remove();
+            // Re-add empty state if list is now empty
+            if (list.children.length === 0) {
+                const empty = document.createElement('li');
+                empty.className = 'empty-state';
+                empty.innerHTML = `
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>No pending requests.</span>`;
+                list.appendChild(empty);
+            }
         };
 
+        li.appendChild(label);
+        li.appendChild(btn);
         list.appendChild(li);
-        
-        // Notify user if they are on a different tab
-        if (!document.getElementById('requests-panel').offsetParent) {
-            document.getElementById('tab-requests').classList.add('has-notification');
+
+        // Badge the requests nav item
+        const reqTab = document.getElementById('tab-requests');
+        if (reqTab) reqTab.classList.add('has-notification');
+
+        // Show badge on requests tab button
+        const badge = document.getElementById('req-badge');
+        if (badge) {
+            const current = parseInt(badge.textContent || '0', 10);
+            badge.textContent = current + 1;
+            badge.style.display = 'inline-flex';
         }
-    },
-    
-    showTab(tabId) {
-        document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
-        document.getElementById(`${tabId}-panel`).style.display = 'block';
-        
-        document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-        const activeBtn = document.getElementById(`tab-${tabId}`);
-        activeBtn.classList.add('active');
-        activeBtn.style.borderTop = "none"; // Clear notification
-    },
-
-    clearMessages() {
-        this.els.msgContainer.innerHTML = '';
-    },
-
-    addMessage(sender, text, isMine) {
-        const div = document.createElement('div');
-        div.className = `msg ${isMine ? 'mine' : 'theirs'}`;
-        // CRITICAL SECURITY: textContent prevents script injection
-        div.textContent = `${sender}: ${text}`; 
-        this.els.msgContainer.appendChild(div);
-        this.els.msgContainer.scrollTop = this.els.msgContainer.scrollHeight;
-    },
-
-    updateBadge(contactId, increment = true) {
-        if (increment) {
-            this.unreadCounts[contactId] = (this.unreadCounts[contactId] || 0) + 1;
-        } else {
-            this.unreadCounts[contactId] = 0;
-        }
-        this.renderContactBadges();
     },
 
     updateInboxBadge(totalUnread) {
         const badge = document.getElementById('inbox-badge');
-        badge.style.display = totalUnread > 0 ? 'inline-block' : 'none';
+        if (!badge) return;
+        if (totalUnread > 0) {
+            badge.textContent = totalUnread;
+            badge.style.display = 'inline-flex';
+        } else {
+            badge.style.display = 'none';
+        }
     },
 
     renderContactBadge(contactId, count) {
-        // Find the specific LI for this contact
         const contactEl = document.querySelector(`.contact-item[data-id="${contactId}"]`);
         if (!contactEl) return;
 
         let badge = contactEl.querySelector('.unread-dot');
-        
         if (count > 0) {
             if (!badge) {
                 badge = document.createElement('span');
@@ -146,5 +123,34 @@ export const UI = {
         } else if (badge) {
             badge.remove();
         }
+    },
+
+    clearMessages() {
+        if (this.els.msgContainer) this.els.msgContainer.innerHTML = '';
+    },
+
+    addMessage(sender, text, isMine) {
+        const container = this.els.msgContainer;
+        if (!container) return;
+
+        const div = document.createElement('div');
+        div.className = `msg ${isMine ? 'mine' : 'theirs'}`;
+
+        const senderEl = document.createElement('span');
+        senderEl.className = 'msg-sender';
+        senderEl.textContent = isMine ? 'You' : sender;
+
+        const textEl = document.createElement('span');
+        textEl.textContent = text; // XSS-safe
+
+        div.appendChild(senderEl);
+        div.appendChild(textEl);
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    },
+
+    // Legacy compat
+    renderUnreadBadge(contactId, count) {
+        this.renderContactBadge(contactId, count);
     }
 };
