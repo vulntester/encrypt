@@ -342,12 +342,21 @@ input:focus {
 .panel {
     position: absolute;
     inset: 0;
+    /* JS sets display:flex to show, display:none to hide */
     display: none;
     flex-direction: column;
     overflow: hidden;
 }
-.panel.panel-visible {
-    display: flex;
+
+/* Chat sub-views — fill the chat panel, toggled by JS */
+.chat-subview {
+    display: none;          /* JS overrides to flex */
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    position: absolute;
+    inset: 0;
 }
 
 .panel-header {
@@ -480,14 +489,7 @@ input:focus {
     /* panel styles already handle this */
 }
 
-#handshake-init-view,
-#active-chat-view {
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-}
+/* chat-subview class handles handshake-init-view and active-chat-view */
 
 .handshake-body {
     flex: 1;

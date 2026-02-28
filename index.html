@@ -70,8 +70,8 @@
     </div>
 </div>
 
-<!-- CHAT VIEW -->
-<div id="chat-view" style="display: none;">
+<!-- CHAT VIEW — hidden until identity created -->
+<div id="chat-view" style="display:none">
 
     <!-- Sidebar -->
     <aside id="sidebar">
@@ -97,14 +97,14 @@
         </div>
 
         <nav class="sidebar-nav">
-            <button id="tab-inbox" class="nav-item active" data-tab="inbox">
+            <button id="tab-inbox" class="nav-item" data-tab="inbox">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                <span>Messages</span>
+                <span class="nav-label">Messages</span>
                 <span id="inbox-badge" class="nav-badge" style="display:none"></span>
             </button>
             <button id="tab-requests" class="nav-item" data-tab="requests">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                <span>Requests</span>
+                <span class="nav-label">Requests</span>
                 <span id="req-badge" class="nav-badge" style="display:none"></span>
             </button>
         </nav>
@@ -112,20 +112,20 @@
         <div class="sidebar-footer">
             <button id="burn-btn" class="burn-btn">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
-                Burn Session
+                <span class="burn-label">Burn Session</span>
             </button>
         </div>
     </aside>
 
-    <!-- Main Panel -->
+    <!-- Main Panel — JS sets display on child panels -->
     <main id="main-panel">
 
-        <!-- Inbox panel -->
+        <!-- INBOX PANEL -->
         <div id="inbox-panel" class="panel">
             <div class="panel-header">
                 <h2 class="panel-title">Messages</h2>
-                <button id="tab-chat" class="new-chat-btn" title="New handshake">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <button id="tab-chat" class="new-chat-btn" title="Start new encrypted session">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     New
                 </button>
             </div>
@@ -133,14 +133,14 @@
                 <ul id="active-chats" class="contact-list">
                     <li class="empty-state">
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        <span>No active chats yet.<br>Send an invitation to start.</span>
+                        <span>No active chats yet.<br>Press <strong>New</strong> to send an invitation.</span>
                     </li>
                 </ul>
             </div>
         </div>
 
-        <!-- Requests panel -->
-        <div id="requests-panel" class="panel" style="display: none;">
+        <!-- REQUESTS PANEL -->
+        <div id="requests-panel" class="panel">
             <div class="panel-header">
                 <h2 class="panel-title">Incoming Requests</h2>
             </div>
@@ -154,11 +154,11 @@
             </div>
         </div>
 
-        <!-- Chat panel -->
-        <div id="chat-panel" class="panel" style="display: none;">
+        <!-- CHAT PANEL — contains two sub-views toggled by JS -->
+        <div id="chat-panel" class="panel">
 
-            <!-- Handshake / new chat initiation -->
-            <div id="handshake-init-view">
+            <!-- Sub-view A: Start a new handshake -->
+            <div id="handshake-init-view" class="chat-subview">
                 <div class="panel-header">
                     <h2 class="panel-title">New Secure Session</h2>
                 </div>
@@ -167,19 +167,17 @@
                         <div class="handshake-icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                         </div>
-                        <p class="handshake-desc">Enter the recipient's full ID to initiate an encrypted handshake.</p>
+                        <p class="handshake-desc">Enter the recipient's full ID to initiate an encrypted handshake. They must be online.</p>
                         <div class="handshake-input-row">
-                            <input type="text" id="target-id" placeholder="username#1234" autocomplete="off" spellcheck="false">
-                            <button id="send-req-btn" class="primary-btn compact">
-                                Send Invite
-                            </button>
+                            <input type="text" id="target-id" placeholder="username#1234" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="none">
+                            <button id="send-req-btn" class="primary-btn compact">Send Invite</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Active conversation -->
-            <div id="active-chat-view" style="display: none;">
+            <!-- Sub-view B: Active conversation -->
+            <div id="active-chat-view" class="chat-subview">
                 <div class="panel-header chat-header">
                     <div class="chat-peer">
                         <div class="peer-avatar"></div>

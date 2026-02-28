@@ -4,15 +4,9 @@
  */
 export const UI = {
 
-    unreadCounts: {},
-
     els: {
         get msgContainer()    { return document.getElementById('messages'); },
-        get contactList()     { return document.getElementById('active-chats'); },
-        get reqList()         { return document.getElementById('incoming-requests'); },
         get currentChatTitle(){ return document.getElementById('chatting-with'); },
-        get handshakeView()   { return document.getElementById('handshake-init-view'); },
-        get chatView()        { return document.getElementById('active-chat-view'); },
     },
 
     notify(text) {
@@ -23,18 +17,17 @@ export const UI = {
         setTimeout(() => toast.remove(), 3000);
     },
 
+    // Show one of the three main panels: 'inbox' | 'requests' | 'chat'
     showTab(tabId) {
-        ['inbox-panel', 'requests-panel', 'chat-panel'].forEach(id => {
-            document.getElementById(id)?.classList.remove('panel-visible');
+        const panels = ['inbox', 'requests', 'chat'];
+        panels.forEach(id => {
+            const el = document.getElementById(`${id}-panel`);
+            if (el) el.style.display = id === tabId ? 'flex' : 'none';
         });
-        document.getElementById(`${tabId}-panel`)?.classList.add('panel-visible');
 
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
         const activeBtn = document.getElementById(`tab-${tabId}`);
-        if (activeBtn) {
-            activeBtn.classList.add('active');
-            activeBtn.classList.remove('has-notification');
-        }
+        if (activeBtn) activeBtn.classList.add('active');
 
         if (tabId === 'requests') {
             const badge = document.getElementById('req-badge');
@@ -42,29 +35,20 @@ export const UI = {
         }
     },
 
-    // Show the chat panel and switch between handshake/active sub-views
+    // Within the chat panel, toggle between handshake entry and active conversation
     showChatPanel(subView) {
-        // Make chat-panel visible
         this.showTab('chat');
-
         const handshake = document.getElementById('handshake-init-view');
         const active    = document.getElementById('active-chat-view');
-
-        if (subView === 'active') {
-            handshake.style.display = 'none';
-            active.style.display    = 'flex';
-        } else {
-            handshake.style.display = 'flex';
-            active.style.display    = 'none';
-        }
+        if (handshake) handshake.style.display = subView === 'handshake' ? 'flex' : 'none';
+        if (active)    active.style.display    = subView === 'active'    ? 'flex' : 'none';
     },
 
     renderRequest(from, onAccept) {
         const list = document.getElementById('incoming-requests');
-        if (!list) return console.error('❌ #incoming-requests not found');
+        if (!list) return;
 
         list.querySelector('.empty-state')?.remove();
-
         if (document.getElementById(`req-${from}`)) return;
 
         const li = document.createElement('li');
@@ -100,8 +84,7 @@ export const UI = {
 
         const badge = document.getElementById('req-badge');
         if (badge) {
-            const current = parseInt(badge.textContent || '0', 10);
-            badge.textContent = current + 1;
+            badge.textContent = (parseInt(badge.textContent || '0', 10) + 1).toString();
             badge.style.display = 'inline-flex';
         }
     },
