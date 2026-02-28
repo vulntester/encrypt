@@ -131,6 +131,10 @@ document.getElementById('msg-input').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') document.getElementById('send-msg-btn').click();
 });
 
+document.getElementById('generate-btn').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') document.getElementById('generate-btn').click();
+});
+
 function showTab(tab) {
     document.getElementById('inbox-panel').style.display = tab === 'inbox' ? 'block' : 'none';
     document.getElementById('requests-panel').style.display = tab === 'requests' ? 'block' : 'none';

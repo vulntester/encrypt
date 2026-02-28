@@ -287,4 +287,8 @@ button:hover { opacity: 0.8; }
     .input-area button {
         width: 100%;
     }
+
+    #generate-btn {
+        width: 100%;
+    }
 }
