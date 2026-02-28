@@ -7,13 +7,12 @@ export const UI = {
     unreadCounts: {},
 
     els: {
-        panels: document.querySelectorAll('.tab-panel'),
-        msgContainer: document.getElementById('messages'),
-        contactList: document.getElementById('active-chats'),
-        reqList: document.getElementById('incoming-requests'),
-        currentChatTitle: document.getElementById('chatting-with'),
-        handshakeView: document.getElementById('handshake-init-view'),
-        chatView: document.getElementById('active-chat-view')
+        get msgContainer()    { return document.getElementById('messages'); },
+        get contactList()     { return document.getElementById('active-chats'); },
+        get reqList()         { return document.getElementById('incoming-requests'); },
+        get currentChatTitle(){ return document.getElementById('chatting-with'); },
+        get handshakeView()   { return document.getElementById('handshake-init-view'); },
+        get chatView()        { return document.getElementById('active-chat-view'); },
     },
 
     notify(text) {
@@ -25,35 +24,35 @@ export const UI = {
     },
 
     showTab(tabId) {
-        // Hide all panels
+        // Toggle panels via class (CSS handles display:flex vs display:none)
         ['inbox-panel', 'requests-panel', 'chat-panel'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.style.display = 'none';
+            document.getElementById(id)?.classList.remove('panel-visible');
         });
-
-        // Show selected panel
-        const panel = document.getElementById(`${tabId}-panel`);
-        if (panel) panel.style.display = 'flex';
+        document.getElementById(`${tabId}-panel`)?.classList.add('panel-visible');
 
         // Update nav active state
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
         const activeBtn = document.getElementById(`tab-${tabId}`);
         if (activeBtn) {
             activeBtn.classList.add('active');
-            // Clear notification dot when switching to that tab
             activeBtn.classList.remove('has-notification');
+        }
+
+        // Clear requests badge when viewing requests
+        if (tabId === 'requests') {
+            const badge = document.getElementById('req-badge');
+            if (badge) badge.style.display = 'none';
         }
     },
 
     renderRequest(from, onAccept) {
         const list = document.getElementById('incoming-requests');
-        if (!list) return console.error("❌ Element #incoming-requests not found!");
+        if (!list) return console.error('❌ #incoming-requests not found');
 
-        // Remove empty state if present
-        const emptyState = list.querySelector('.empty-state');
-        if (emptyState) emptyState.remove();
+        // Remove empty state
+        list.querySelector('.empty-state')?.remove();
 
-        // Avoid duplicate requests
+        // Avoid duplicates
         if (document.getElementById(`req-${from}`)) return;
 
         const li = document.createElement('li');
@@ -69,12 +68,15 @@ export const UI = {
         btn.onclick = () => {
             onAccept(from);
             li.remove();
-            // Re-add empty state if list is now empty
             if (list.children.length === 0) {
                 const empty = document.createElement('li');
                 empty.className = 'empty-state';
                 empty.innerHTML = `
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
                     <span>No pending requests.</span>`;
                 list.appendChild(empty);
             }
@@ -84,11 +86,7 @@ export const UI = {
         li.appendChild(btn);
         list.appendChild(li);
 
-        // Badge the requests nav item
-        const reqTab = document.getElementById('tab-requests');
-        if (reqTab) reqTab.classList.add('has-notification');
-
-        // Show badge on requests tab button
+        // Badge the requests tab
         const badge = document.getElementById('req-badge');
         if (badge) {
             const current = parseInt(badge.textContent || '0', 10);
@@ -100,24 +98,19 @@ export const UI = {
     updateInboxBadge(totalUnread) {
         const badge = document.getElementById('inbox-badge');
         if (!badge) return;
-        if (totalUnread > 0) {
-            badge.textContent = totalUnread;
-            badge.style.display = 'inline-flex';
-        } else {
-            badge.style.display = 'none';
-        }
+        badge.textContent = totalUnread;
+        badge.style.display = totalUnread > 0 ? 'inline-flex' : 'none';
     },
 
     renderContactBadge(contactId, count) {
-        const contactEl = document.querySelector(`.contact-item[data-id="${contactId}"]`);
-        if (!contactEl) return;
-
-        let badge = contactEl.querySelector('.unread-dot');
+        const el = document.querySelector(`.contact-item[data-id="${contactId}"]`);
+        if (!el) return;
+        let badge = el.querySelector('.unread-dot');
         if (count > 0) {
             if (!badge) {
                 badge = document.createElement('span');
                 badge.className = 'unread-dot';
-                contactEl.appendChild(badge);
+                el.appendChild(badge);
             }
             badge.textContent = count;
         } else if (badge) {
@@ -126,7 +119,8 @@ export const UI = {
     },
 
     clearMessages() {
-        if (this.els.msgContainer) this.els.msgContainer.innerHTML = '';
+        const c = this.els.msgContainer;
+        if (c) c.innerHTML = '';
     },
 
     addMessage(sender, text, isMine) {
@@ -141,7 +135,7 @@ export const UI = {
         senderEl.textContent = isMine ? 'You' : sender;
 
         const textEl = document.createElement('span');
-        textEl.textContent = text; // XSS-safe
+        textEl.textContent = text; // XSS-safe: textContent, not innerHTML
 
         div.appendChild(senderEl);
         div.appendChild(textEl);
@@ -149,7 +143,7 @@ export const UI = {
         container.scrollTop = container.scrollHeight;
     },
 
-    // Legacy compat
+    // Compat alias
     renderUnreadBadge(contactId, count) {
         this.renderContactBadge(contactId, count);
     }
