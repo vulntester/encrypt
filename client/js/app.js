@@ -122,8 +122,11 @@ async function openChat(contactId) {
 
 // Submit handshake request with Enter in the + tab input
 const targetIdInput = document.getElementById('target-id');
-targetIdInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') document.getElementById('send-req-btn').click();
+targetIdInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('send-req-btn').click();
+    }
 });
 
 // Ensure "Enter" key works for sending messages
@@ -238,8 +241,6 @@ function renderContacts() {
         name.className = 'contact-name';
         name.textContent = contactId;
         li.appendChild(name);
-        li.textContent = contactId;
-        li.className = 'contact-item';
         li.dataset.id = contactId;
         li.style.cursor = 'pointer';
         li.onclick = () => openChat(contactId);
