@@ -63,9 +63,7 @@ function initChatView() {
     document.getElementById('tab-requests').onclick = () => UI.showTab('requests');
     document.getElementById('tab-chat').onclick = () => {
         currentChat = null;
-        UI.showTab('chat');
-        document.getElementById('handshake-init-view').style.display = 'flex';
-        document.getElementById('active-chat-view').style.display = 'none';
+        UI.showChatPanel('handshake');
     };
 
     // Show inbox by default
@@ -99,10 +97,7 @@ function updateNotificationUI(contactId) {
 
 async function openChat(contactId) {
     currentChat = contactId;
-    UI.showTab('chat');
-
-    document.getElementById('handshake-init-view').style.display = 'none';
-    document.getElementById('active-chat-view').style.display = 'flex';
+    UI.showChatPanel('active');
 
     UI.els.currentChatTitle.textContent = contactId;
 

@@ -29,7 +29,7 @@ body {
     font-family: var(--sans);
     background: var(--bg);
     color: var(--text);
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
 }
@@ -144,7 +144,7 @@ input, textarea {
     padding: 10px 14px;
     border-radius: var(--radius);
     font-family: var(--mono);
-    font-size: 13px;
+    font-size: 16px;
     outline: none;
     transition: border-color 0.15s, box-shadow 0.15s;
     -webkit-appearance: none;
@@ -238,7 +238,7 @@ input:focus {
 }
 .identity-value {
     font-family: var(--mono);
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text);
     word-break: break-all;
     font-weight: 500;
@@ -275,7 +275,7 @@ input:focus {
     border-radius: 8px;
     color: var(--text-2);
     font-family: var(--sans);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.12s;
@@ -360,7 +360,7 @@ input:focus {
     min-height: 57px;
 }
 .panel-title {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     letter-spacing: -0.02em;
     color: var(--text);
@@ -377,19 +377,21 @@ input:focus {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 7px 12px;
-    background: var(--surface-3);
-    border: 1px solid var(--border-2);
+    padding: 7px 14px;
+    background: var(--accent);
+    border: 1px solid var(--accent);
     border-radius: 8px;
-    color: var(--text-2);
+    color: #031a13;
     font-family: var(--sans);
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 13px;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.12s;
+    transition: all 0.15s;
     flex-shrink: 0;
+    letter-spacing: -0.01em;
 }
-.new-chat-btn:hover { background: var(--accent-dim); border-color: rgba(34,211,165,0.25); color: var(--accent); }
+.new-chat-btn:hover { background: #1ec99d; border-color: #1ec99d; transform: translateY(-1px); box-shadow: 0 3px 12px rgba(34,211,165,0.25); }
+.new-chat-btn:active { transform: none; box-shadow: none; }
 
 /* ─── CONTACT LIST ───────────────────────────────────────────────────── */
 .contact-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
@@ -407,7 +409,7 @@ input:focus {
 .contact-item:hover { background: var(--surface-2); border-color: var(--border-2); }
 .contact-name {
     font-family: var(--mono);
-    font-size: 12.5px;
+    font-size: 13.5px;
     color: var(--text);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -517,7 +519,7 @@ input:focus {
 }
 .handshake-desc { font-size: 13px; color: var(--text-2); line-height: 1.6; max-width: 280px; }
 .handshake-input-row { display: flex; gap: 8px; width: 100%; }
-.handshake-input-row input { font-size: 12.5px; }
+.handshake-input-row input { font-size: 16px; }
 
 /* Active chat */
 .chat-header { gap: 0; }
@@ -566,8 +568,8 @@ input:focus {
     max-width: 72%;
     padding: 9px 13px;
     border-radius: 12px;
-    font-size: 13.5px;
-    line-height: 1.55;
+    font-size: 15px;
+    line-height: 1.6;
     word-break: break-word;
     animation: msgIn 0.15s ease both;
 }
@@ -597,7 +599,7 @@ input:focus {
     background: var(--surface);
     flex-shrink: 0;
 }
-.compose-area input { flex: 1; background: var(--surface-2); padding: 10px 14px; font-size: 13.5px; border-radius: 10px; }
+.compose-area input { flex: 1; background: var(--surface-2); padding: 10px 14px; font-size: 16px; border-radius: 10px; }
 .send-btn {
     width: 38px; height: 38px; flex-shrink: 0;
     background: var(--accent); border: none; border-radius: 10px;

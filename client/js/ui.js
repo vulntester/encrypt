@@ -24,13 +24,11 @@ export const UI = {
     },
 
     showTab(tabId) {
-        // Toggle panels via class (CSS handles display:flex vs display:none)
         ['inbox-panel', 'requests-panel', 'chat-panel'].forEach(id => {
             document.getElementById(id)?.classList.remove('panel-visible');
         });
         document.getElementById(`${tabId}-panel`)?.classList.add('panel-visible');
 
-        // Update nav active state
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
         const activeBtn = document.getElementById(`tab-${tabId}`);
         if (activeBtn) {
@@ -38,10 +36,26 @@ export const UI = {
             activeBtn.classList.remove('has-notification');
         }
 
-        // Clear requests badge when viewing requests
         if (tabId === 'requests') {
             const badge = document.getElementById('req-badge');
             if (badge) badge.style.display = 'none';
+        }
+    },
+
+    // Show the chat panel and switch between handshake/active sub-views
+    showChatPanel(subView) {
+        // Make chat-panel visible
+        this.showTab('chat');
+
+        const handshake = document.getElementById('handshake-init-view');
+        const active    = document.getElementById('active-chat-view');
+
+        if (subView === 'active') {
+            handshake.style.display = 'none';
+            active.style.display    = 'flex';
+        } else {
+            handshake.style.display = 'flex';
+            active.style.display    = 'none';
         }
     },
 
@@ -49,10 +63,8 @@ export const UI = {
         const list = document.getElementById('incoming-requests');
         if (!list) return console.error('❌ #incoming-requests not found');
 
-        // Remove empty state
         list.querySelector('.empty-state')?.remove();
 
-        // Avoid duplicates
         if (document.getElementById(`req-${from}`)) return;
 
         const li = document.createElement('li');
@@ -86,7 +98,6 @@ export const UI = {
         li.appendChild(btn);
         list.appendChild(li);
 
-        // Badge the requests tab
         const badge = document.getElementById('req-badge');
         if (badge) {
             const current = parseInt(badge.textContent || '0', 10);
@@ -135,7 +146,7 @@ export const UI = {
         senderEl.textContent = isMine ? 'You' : sender;
 
         const textEl = document.createElement('span');
-        textEl.textContent = text; // XSS-safe: textContent, not innerHTML
+        textEl.textContent = text; // XSS-safe
 
         div.appendChild(senderEl);
         div.appendChild(textEl);
@@ -143,7 +154,6 @@ export const UI = {
         container.scrollTop = container.scrollHeight;
     },
 
-    // Compat alias
     renderUnreadBadge(contactId, count) {
         this.renderContactBadge(contactId, count);
     }
