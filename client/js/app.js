@@ -222,11 +222,8 @@ function renderContacts() {
     const contacts = Object.keys(Storage.getJson('contacts'));
     contacts.forEach(contactId => {
         const li = document.createElement('li');
+        li.textContent = contactId;
         li.className = 'contact-item';
-        const name = document.createElement('span');
-        name.className = 'contact-name';
-        name.textContent = contactId;
-        li.appendChild(name);
         li.dataset.id = contactId;
         li.style.cursor = 'pointer';
         li.onclick = () => openChat(contactId);
