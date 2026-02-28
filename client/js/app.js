@@ -207,9 +207,14 @@ function renderContacts() {
     contacts.forEach(contactId => {
         const li = document.createElement('li');
         li.textContent = contactId;
+        li.className = 'contact-item';
+        li.dataset.id = contactId;
         li.style.cursor = 'pointer';
         li.onclick = () => openChat(contactId);
         list.appendChild(li);
+
+        // Re-apply any unread badge when the contact list is re-rendered.
+        UI.renderContactBadge(contactId, unreadMessages[contactId] || 0);
     });
 }
 
