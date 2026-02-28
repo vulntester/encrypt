@@ -1,4 +1,4 @@
-name = "ephemeral-relay-worker"
+name = "encrypt"
 main = "worker/relay-worker.js"
 compatibility_date = "2026-02-28"
 
