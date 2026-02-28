@@ -1,0 +1,12 @@
+name = "ephemeral-relay-worker"
+main = "worker/relay-worker.js"
+compatibility_date = "2026-02-28"
+
+[durable_objects]
+bindings = [
+  { name = "RELAY_ROOM", class_name = "RelayRoom" }
+]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RelayRoom"]
