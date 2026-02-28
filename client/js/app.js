@@ -6,6 +6,7 @@ import { UI } from './ui.js';
 let net = null;
 let currentChat = null;
 let unreadMessages = {}; // Format: { "alice#1234": 2, "bob#5678": 0 }
+let expiryCountdownInterval = null;
 
 // --- Initialization & TTL Enforcement ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -69,6 +70,27 @@ function initChatView() {
 };
     
     renderContacts();
+    startExpiryCountdown();
+}
+
+function startExpiryCountdown() {
+    if (expiryCountdownInterval) clearInterval(expiryCountdownInterval);
+
+    const tick = () => {
+        const expiryRaw = Storage.get('session_expiry');
+        const timerEl = document.getElementById('timer-val');
+        if (!timerEl || !expiryRaw) return;
+
+        const expiryTs = parseInt(expiryRaw, 10);
+        const remainingMs = Math.max(0, expiryTs - Date.now());
+        const totalSeconds = Math.floor(remainingMs / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    };
+
+    tick();
+    expiryCountdownInterval = setInterval(tick, 1000);
 }
 
 function updateNotificationUI(contactId) {
@@ -191,12 +213,6 @@ document.getElementById('burn-btn').onclick = () => {
     }
 };
 
-document.getElementById('tab-chat').onclick = () => {
-    currentChat = null;
-    UI.showTab('chat');
-    UI.els.handshakeView.style.display = 'block';
-    UI.els.chatView.style.display = 'none';
-};
 
 // --- Rendering Logic (XSS Safe) ---
 function renderContacts() {
@@ -206,10 +222,18 @@ function renderContacts() {
     const contacts = Object.keys(Storage.getJson('contacts'));
     contacts.forEach(contactId => {
         const li = document.createElement('li');
-        li.textContent = contactId;
+        li.className = 'contact-item';
+        const name = document.createElement('span');
+        name.className = 'contact-name';
+        name.textContent = contactId;
+        li.appendChild(name);
+        li.dataset.id = contactId;
         li.style.cursor = 'pointer';
         li.onclick = () => openChat(contactId);
         list.appendChild(li);
+
+        // Re-apply any unread badge when the contact list is re-rendered.
+        UI.renderContactBadge(contactId, unreadMessages[contactId] || 0);
     });
 }
 
