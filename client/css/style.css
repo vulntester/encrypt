@@ -704,7 +704,7 @@ input:focus {
         justify-content: center;
         align-items: center;
         gap: 4px;
-        padding: 0;
+        padding: 12px;
         height: 100%;
         border-radius: 0;
         border: none;
