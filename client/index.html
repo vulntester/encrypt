@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ephemeral PGP Chat</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script type="module">
+import openpgp from 'https://cdn.jsdelivr.net/npm/openpgp@6.3.0/+esm'
+</script>
+</head>
+<body>
+    <div id="setup-view">
+        <h2>Enter Username</h2>
+        <input type="text" id="username-input" placeholder="e.g. alice" maxlength="20">
+        <button id="generate-btn">Generate Identity</button>
+        <p id="setup-status"></p>
+    </div>
+
+    <div id="chat-view" style="display: none;">
+    <div class="header-info">
+        <h3 id="my-identity"></h3>
+        <p id="ttl-timer">Session expires in: <span id="timer-val">60:00</span></p>
+    </div>
+    
+    <div class="tabs">
+        <button id="tab-inbox">Inbox</button>
+        <button id="tab-requests">Requests</button>
+        <button id="tab-chat" disabled>Chat</button> </div>
+
+    <div id="inbox-panel" class="tab-panel">
+        <h4>Contacts</h4>
+        <ul id="active-chats"></ul>
+    </div>
+
+    <div id="requests-panel" class="tab-panel" style="display: none;">
+        <div class="request-actions">
+            <h4>Start New Handshake</h4>
+            <input type="text" id="target-id" placeholder="username#1234">
+            <button id="send-req-btn">Send Invitation</button>
+        </div>
+        <hr>
+        <h4>Pending Requests</h4>
+        <ul id="incoming-requests"></ul>
+    </div>
+
+    <div id="chat-panel" class="tab-panel" style="display: none;">
+        <h4 id="chatting-with">No active chat</h4>
+        <div id="messages"></div>
+        <div class="input-area">
+            <input type="text" id="msg-input" placeholder="Enter encrypted message...">
+            <button id="send-msg-btn">Send</button>
+        </div>
+    </div>
+</div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

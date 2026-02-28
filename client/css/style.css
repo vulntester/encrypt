@@ -1,0 +1,85 @@
+:root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --text: #f8fafc;
+    --primary: #38bdf8;
+    --danger: #ef4444;
+    --success: #22c55e;
+}
+
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+    margin: 0;
+}
+
+#setup-view, #chat-view {
+    width: 100%;
+    max-width: 500px;
+    background: var(--card);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
+input {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: white;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+button {
+    cursor: pointer;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    background: var(--primary);
+    color: var(--bg);
+    font-weight: bold;
+    transition: opacity 0.2s;
+}
+
+button:hover { opacity: 0.8; }
+
+.tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 1rem;
+}
+
+#messages {
+    height: 300px;
+    overflow-y: auto;
+    border: 1px solid #334155;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+#ttl-timer {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    text-align: right;
+}
+
+.request-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #0f172a;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+}

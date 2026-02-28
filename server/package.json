@@ -1,0 +1,12 @@
+{
+  "name": "ephemeral-relay",
+  "version": "1.0.0",
+  "description": "Minimal WebSocket relay for PGP messaging",
+  "main": "relay.js",
+  "dependencies": {
+    "ws": "^8.13.0"
+  },
+  "scripts": {
+    "start": "node relay.js"
+  }
+}
