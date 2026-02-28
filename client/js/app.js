@@ -119,6 +119,13 @@ async function openChat(contactId) {
     renderMessages(contactId);
 }
 
+
+// Submit handshake request with Enter in the + tab input
+const targetIdInput = document.getElementById('target-id');
+targetIdInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') document.getElementById('send-req-btn').click();
+});
+
 // Ensure "Enter" key works for sending messages
 document.getElementById('msg-input').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') document.getElementById('send-msg-btn').click();

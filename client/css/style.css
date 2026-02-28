@@ -208,3 +208,83 @@ button:hover { opacity: 0.8; }
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+
+.msg {
+    max-width: 80%;
+    padding: 0.6rem 0.75rem;
+    border-radius: 10px;
+    word-break: break-word;
+}
+
+.msg.mine {
+    align-self: flex-end;
+    background: #1d4ed8;
+    color: #eff6ff;
+}
+
+.msg.theirs {
+    align-self: flex-start;
+    background: #334155;
+    color: #f8fafc;
+}
+
+.input-area {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.input-area input {
+    margin-bottom: 0;
+}
+
+@media (max-width: 640px) {
+    body {
+        padding: 0.75rem;
+    }
+
+    #setup-view, #chat-view {
+        max-width: 100%;
+        padding: 1rem;
+        border-radius: 6px;
+    }
+
+    .header-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .meta-controls {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .tabs {
+        gap: 0.5rem;
+        overflow-x: auto;
+        padding-bottom: 0.75rem;
+    }
+
+    .tabs button {
+        flex: 1;
+        min-width: max-content;
+        padding: 0.6rem 0.75rem;
+    }
+
+    #messages {
+        height: 45vh;
+    }
+
+    .msg {
+        max-width: 92%;
+    }
+
+    .input-area {
+        flex-direction: column;
+    }
+
+    .input-area button {
+        width: 100%;
+    }
+}
