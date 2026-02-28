@@ -227,6 +227,8 @@ function renderContacts() {
         name.className = 'contact-name';
         name.textContent = contactId;
         li.appendChild(name);
+        li.textContent = contactId;
+        li.className = 'contact-item';
         li.dataset.id = contactId;
         li.style.cursor = 'pointer';
         li.onclick = () => openChat(contactId);
